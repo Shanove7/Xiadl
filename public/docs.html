@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xyon API Docs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; }
+        pre { background: #1e293b; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; color: #a5b4fc; }
+    </style>
+</head>
+<body class="p-8 max-w-4xl mx-auto">
+    
+    <header class="mb-10 border-b border-gray-700 pb-6">
+        <h1 class="text-4xl font-bold text-blue-500 mb-2">Xyon API</h1>
+        <p class="text-gray-400">Dokumentasi sederhana untuk integrasi downloader.</p>
+        <a href="/" class="text-blue-400 hover:underline mt-2 block">&larr; Back to Home</a>
+    </header>
+
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Endpoint</h2>
+        <div class="flex items-center gap-4 bg-slate-800 p-4 rounded-lg">
+            <span class="bg-green-600 text-white px-2 py-1 rounded text-sm font-bold">POST</span>
+            <code class="text-blue-300">/api/download</code>
+        </div>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Request Body</h2>
+        <pre>{
+  "url": "https://tiktok.com/...",  
+  "platform": "tiktok" // Optional (null for auto-detect)
+}</pre>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Code Examples</h2>
+
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-blue-300 mb-2">cURL</h3>
+            <pre>curl -X POST https://your-domain.pages.dev/api/download \
+-H "Content-Type: application/json" \
+-d '{"url": "https://www.tiktok.com/@user/video/123", "platform": "tiktok"}'</pre>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-blue-300 mb-2">Python (Requests)</h3>
+            <pre>import requests
+
+url = "https://your-domain.pages.dev/api/download"
+payload = {
+    "url": "https://www.tiktok.com/@user/video/123",
+    "platform": "tiktok"
+}
+
+response = requests.post(url, json=payload)
+print(response.json())</pre>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-blue-300 mb-2">Node.js (Axios)</h3>
+            <pre>const axios = require('axios');
+
+async function download() {
+  const res = await axios.post('https://your-domain.pages.dev/api/download', {
+    url: 'https://www.tiktok.com/@user/video/123'
+  });
+  console.log(res.data);
+}
+
+download();</pre>
+        </div>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Response Structure</h2>
+        <pre>{
+  "status": true,
+  "platform": "tiktok",
+  "title": "Video Title Example",
+  "download": {
+    "video": "https://cdn.tiktok.com/...",
+    "audio": "https://cdn.tiktok.com/...",
+    "image": "https://cdn.tiktok.com/..."
+  }
+}</pre>
+    </section>
+
+</body>
+</html>
