@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xyon Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-platform { transition: all 0.2s; }
+        .btn-platform:hover { transform: translateY(-2px); background-color: #3b82f6; }
+        .loader { border-top-color: #3b82f6; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-3xl glass rounded-2xl p-8 shadow-2xl">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-500">XYON<span class="text-white">DOWNLOADER</span></h1>
+            <a href="docs.html" class="text-sm text-gray-400 hover:text-white transition">API Docs &rarr;</a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <button onclick="selectPlatform('tiktok')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">TikTok</span>
+                <span class="text-xs text-gray-400">Video/HD/No WM</span>
+            </button>
+            <button onclick="selectPlatform('youtube')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">YouTube</span>
+                <span class="text-xs text-gray-400">MP4/MP3/4K</span>
+            </button>
+            <button onclick="selectPlatform('instagram')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">Instagram</span>
+                <span class="text-xs text-gray-400">Post/Reels/Story</span>
+            </button>
+            <button onclick="selectPlatform('twitter')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">Twitter/X</span>
+                <span class="text-xs text-gray-400">Video/GIF</span>
+            </button>
+            <button onclick="selectPlatform('facebook')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">Facebook</span>
+                <span class="text-xs text-gray-400">Video/Reels</span>
+            </button>
+            <button onclick="selectPlatform('pinterest')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">Pinterest</span>
+                <span class="text-xs text-gray-400">Image/Video</span>
+            </button>
+            <button onclick="selectPlatform('reddit')" class="btn-platform p-3 rounded-lg bg-slate-800 text-center text-sm">
+                <span class="block font-bold">Reddit</span>
+                <span class="text-xs text-gray-400">Video/GIF</span>
+            </button>
+            <button onclick="selectPlatform(null)" class="btn-platform p-3 rounded-lg bg-blue-600 text-center text-sm ring-2 ring-blue-400">
+                <span class="block font-bold">Auto Detect</span>
+                <span class="text-xs text-blue-100">50+ Platforms</span>
+            </button>
+        </div>
+
+        <div class="relative mb-6">
+            <input type="text" id="urlInput" placeholder="Paste link here..." class="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 px-6 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500 transition">
+            <button onclick="download()" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg font-medium transition">
+                Download
+            </button>
+        </div>
+
+        <div id="loader" class="hidden flex justify-center py-4">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 h-8 w-8"></div>
+        </div>
+
+        <div id="result" class="hidden mt-6 bg-slate-800 rounded-xl p-4 animate-fade-in">
+        </div>
+    </div>
+
+    <script>
+        let currentPlatform = null;
+
+        function selectPlatform(platform) {
+            currentPlatform = platform;
+            const msg = platform ? `Selected: ${platform.toUpperCase()}` : "Mode: Auto Detect";
+            document.getElementById('urlInput').placeholder = `Paste ${msg} link...`;
+        }
+
+        async function download() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            const loader = document.getElementById('loader');
+
+            if (!url) return alert('Please enter a URL');
+
+            resultDiv.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, platform: currentPlatform })
+                });
+                
+                const data = await res.json();
+                loader.classList.add('hidden');
+
+                if (!data.status) throw new Error(data.error || 'Failed');
+
+                let html = `
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <img src="${data.thumbnail || 'https://via.placeholder.com/150'}" class="w-full md:w-48 h-32 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-1 truncate">${data.title || 'No Title'}</h3>
+                            <p class="text-sm text-gray-400 mb-3">${data.author || 'Unknown Author'}</p>
+                            <div class="flex gap-2 flex-wrap">
+                `;
+
+                if (data.download.video) {
+                    html += `<a href="${data.download.video}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Download Video</a>`;
+                }
+                if (data.download.audio) {
+                    html += `<a href="${data.download.audio}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">Download Audio</a>`;
+                }
+                
+                html += `</div></div></div>`;
+                resultDiv.innerHTML = html;
+                resultDiv.classList.remove('hidden');
+
+            } catch (e) {
+                loader.classList.add('hidden');
+                alert(e.message);
+            }
+        }
+    </script>
+</body>
+</html>
